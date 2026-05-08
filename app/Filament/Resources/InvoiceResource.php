@@ -21,12 +21,35 @@ class InvoiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                //
-            ]);
-    }
+{
+    return $form
+        ->schema([
+            Forms\Components\TextInput::make('invoice_number')
+                ->default('INV-' . date('Ymd-His'))
+                ->readonly()
+                ->required(),
+
+            // Bagian ini yang memperbaiki error "customer_id doesn't have a default value"
+            Forms\Components\Select::make('customer_id')
+                ->relationship('customer', 'name') // Menarik nama dari tabel Customers
+                ->searchable()
+                ->preload()
+                ->required(),
+
+            Forms\Components\TextInput::make('amount')
+                ->numeric()
+                ->prefix('Rp')
+                ->required(),
+
+            Forms\Components\Select::make('status')
+                ->options([
+                    'unpaid' => 'Belum Bayar',
+                    'paid' => 'Lunas',
+                ])
+                ->default('unpaid')
+                ->required(),
+        ]);
+}
 
     public static function table(Table $table): Table
 {
