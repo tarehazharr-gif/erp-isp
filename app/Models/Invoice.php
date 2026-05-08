@@ -11,11 +11,12 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'invoice_number',
-        'customer_id',
-        'amount',
-        'status',
-    ];
+    'invoice_number',
+    'customer_id',
+    'due_date',
+    'amount',
+    'status',
+];
 
     /**
      * Menghubungkan Invoice ke Customer
