@@ -18,9 +18,6 @@ class Invoice extends Model
     'status',
 ];
 
-    /**
-     * Menghubungkan Invoice ke Customer
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);

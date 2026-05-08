@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
@@ -29,12 +30,17 @@ class InvoiceResource extends Resource
                 ->readonly()
                 ->required(),
 
-            // Bagian ini yang memperbaiki error "customer_id doesn't have a default value"
             Forms\Components\Select::make('customer_id')
-                ->relationship('customer', 'name') // Menarik nama dari tabel Customers
+                ->relationship('customer', 'name')
                 ->searchable()
                 ->preload()
                 ->required(),
+
+            // BARIS INI WAJIB ADA UNTUK MEMPERBAIKI ERROR DUE_DATE
+            Forms\Components\DatePicker::make('due_date')
+                ->label('Tanggal Jatuh Tempo')
+                ->required()
+                ->default(now()->addDays(7)), 
 
             Forms\Components\TextInput::make('amount')
                 ->numeric()
@@ -76,6 +82,18 @@ class InvoiceResource extends Resource
                 ->action(fn ($record) => $record->update(['status' => 'paid']))
                 ->visible(fn ($record) => $record->status === 'unpaid'),
             Tables\Actions\EditAction::make(),
+
+            // Tombol Cetak PDF yang kita buat tadi
+    Tables\Actions\Action::make('pdf')
+        ->label('Cetak PDF')
+        ->color('info')
+        ->icon('heroicon-o-arrow-down-tray')
+        ->action(function (Invoice $record) {
+            $pdf = Pdf::loadView('invoice-pdf', ['record' => $record]);
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->stream();
+            }, "Invoice-{$record->invoice_number}.pdf");
+        }),
         ]);
 }
 
